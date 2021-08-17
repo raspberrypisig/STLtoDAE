@@ -1,0 +1,1 @@
+cxfreeze -c stltodae.py --target-dir stltodae
