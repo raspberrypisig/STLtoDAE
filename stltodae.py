@@ -20,10 +20,25 @@ import sys
 import numpy
 import pymeshlab
 
+def simplifySTL(ms, newFaceCount=1000):
+	ms.apply_filter('simplification_quadric_edge_collapse_decimation', targetfacenum=newFaceCount, preservenormal=True)
+
 def convertSTLtoDAE(file):
     ms = pymeshlab.MeshSet()
     ms.load_new_mesh(file)
     newfile = file.replace('.stl','') + '.dae'
+    m = ms.current_mesh()
+    bounding = m.bounding_box()
+    x = bounding.dim_x()
+    y = bounding.dim_y()
+    z = bounding.dim_z()
+    face = m.face_number()
+    vertex = m.vertex_number()
+    msg = f"Dimensions of 3D model:\n\nX: {x} Y: {y} Z: {z}\n\nComplexity of model:\n\nFace Count: {face}\nVertex Count: {vertex}\n\nDo you want to simplify model? Recommended to simplify when face count is greater than 40000."
+    shouldSimplify = easygui.ynbox(msg, 'Create Collada DAE for Sketchup')
+    if shouldSimplify:
+    	faceCount = easygui.integerbox(msg='Enter new face count', title='Create Collada DAE for Sketchup', default=face, upperbound=1000000000)
+    	simplifySTL(ms, faceCount)
     ms.save_current_mesh(newfile)
     return newfile
 
